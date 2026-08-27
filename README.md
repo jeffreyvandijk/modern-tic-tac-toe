@@ -12,4 +12,5 @@ minimax AI opponent.
 - Modern, animated, responsive UI (likely dark mode)
 - Deployed to GitHub Pages with a shareable link
 
-Full project brief and progress: tracked in the repo's issues.
+Full project brief and progress:
+https://github.com/jeffreyvandijk/modern-tic-tac-toe/issues/1
