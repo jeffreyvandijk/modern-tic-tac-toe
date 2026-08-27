@@ -1,15 +1,18 @@
 import { useState } from 'react'
-import { calculateWinner, createEmptyBoard, getNextPlayer, isBoardFull, isGameOver, makeMove } from './game/gameLogic'
+import { calculateWinner, createEmptyBoard, getNextPlayer, isBoardFull, makeMove } from './game/gameLogic'
 
-function statusText(board) {
-  const { winner } = calculateWinner(board)
+function statusText({ winner, isFull, nextPlayer }) {
   if (winner) return `Winner: ${winner}`
-  if (isBoardFull(board)) return 'Draw'
-  return `Next player: ${getNextPlayer(board)}`
+  if (isFull) return 'Draw'
+  return `Next player: ${nextPlayer}`
 }
 
 export default function App() {
   const [board, setBoard] = useState(createEmptyBoard())
+
+  const { winner } = calculateWinner(board)
+  const isFull = isBoardFull(board)
+  const gameOver = winner !== null || isFull
 
   function handleCellClick(index) {
     const { board: next, error } = makeMove(board, index)
@@ -23,16 +26,15 @@ export default function App() {
   return (
     <main>
       <h1>Tic-Tac-Toe</h1>
-      <p>{statusText(board)}</p>
-      <div role="grid">
+      <p>{statusText({ winner, isFull, nextPlayer: getNextPlayer(board) })}</p>
+      <div>
         {board.map((cell, index) => (
           <button
             key={index}
             type="button"
-            role="button"
             aria-label={cell ? `Cell, ${cell}` : 'Empty cell'}
             onClick={() => handleCellClick(index)}
-            disabled={isGameOver(board)}
+            disabled={gameOver}
           >
             {cell ?? ''}
           </button>
