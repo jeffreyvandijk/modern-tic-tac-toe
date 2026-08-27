@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   calculateWinner,
   createEmptyBoard,
+  getGameStatus,
   getNextPlayer,
   isBoardFull,
   isGameOver,
@@ -70,6 +71,20 @@ describe('makeMove', () => {
   it('rejects a move at an out-of-range index', () => {
     const board = createEmptyBoard()
     const { board: next, error } = makeMove(board, 9)
+    expect(error).toBe('invalid-index')
+    expect(next).toEqual(board)
+  })
+
+  it('rejects a non-numeric index instead of falling through to cell-occupied', () => {
+    const board = createEmptyBoard()
+    const { board: next, error } = makeMove(board, NaN)
+    expect(error).toBe('invalid-index')
+    expect(next).toEqual(board)
+  })
+
+  it('rejects a non-integer index', () => {
+    const board = createEmptyBoard()
+    const { board: next, error } = makeMove(board, 1.5)
     expect(error).toBe('invalid-index')
     expect(next).toEqual(board)
   })
@@ -155,5 +170,35 @@ describe('isGameOver', () => {
     const board = createEmptyBoard()
     board[0] = 'X'
     expect(isGameOver(board)).toBe(false)
+  })
+})
+
+describe('getGameStatus', () => {
+  it('reports an in-progress game on an empty board', () => {
+    expect(getGameStatus(createEmptyBoard())).toEqual({
+      winner: null,
+      line: null,
+      isFull: false,
+      isOver: false,
+      nextPlayer: 'X',
+    })
+  })
+
+  it('reports a winner and the winning line', () => {
+    const board = createEmptyBoard()
+    board[0] = board[1] = board[2] = 'X'
+    board[3] = board[4] = 'O'
+    const status = getGameStatus(board)
+    expect(status.winner).toBe('X')
+    expect(status.line).toEqual([0, 1, 2])
+    expect(status.isOver).toBe(true)
+  })
+
+  it('reports a full board with no winner as over but with no winner', () => {
+    const board = ['X', 'O', 'X', 'X', 'O', 'O', 'O', 'X', 'X']
+    const status = getGameStatus(board)
+    expect(status.winner).toBeNull()
+    expect(status.isFull).toBe(true)
+    expect(status.isOver).toBe(true)
   })
 })

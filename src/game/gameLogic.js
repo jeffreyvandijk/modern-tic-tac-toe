@@ -1,3 +1,5 @@
+const BOARD_SIZE = 9
+
 const WINNING_LINES = [
   [0, 1, 2],
   [3, 4, 5],
@@ -10,7 +12,7 @@ const WINNING_LINES = [
 ]
 
 export function createEmptyBoard() {
-  return Array(9).fill(null)
+  return Array(BOARD_SIZE).fill(null)
 }
 
 export function getNextPlayer(board) {
@@ -32,12 +34,26 @@ export function isBoardFull(board) {
   return board.every((cell) => cell !== null)
 }
 
+// Single source of truth for a board's derived state, computed in one pass
+// so callers never have to re-derive (and risk disagreeing on) game-over.
+export function getGameStatus(board) {
+  const { winner, line } = calculateWinner(board)
+  const isFull = isBoardFull(board)
+  return {
+    winner,
+    line,
+    isFull,
+    isOver: winner !== null || isFull,
+    nextPlayer: getNextPlayer(board),
+  }
+}
+
 export function isGameOver(board) {
-  return calculateWinner(board).winner !== null || isBoardFull(board)
+  return getGameStatus(board).isOver
 }
 
 export function makeMove(board, index) {
-  if (index < 0 || index > 8) {
+  if (!Number.isInteger(index) || index < 0 || index >= BOARD_SIZE) {
     return { board, error: 'invalid-index' }
   }
   if (isGameOver(board)) {
